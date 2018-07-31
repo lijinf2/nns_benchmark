@@ -162,6 +162,24 @@ int main(int argc, char** argv) {
     indexer.BuildMultiIndex(points_file, metainfo_file, points_count, coarse_vocabs, 
                             fine_vocabs, mode, build_coarse_quantizations,
                             files_prefix, coarse_quantizations_file);  
+  } // added by JF
+  else if (fine_vocabs.size() == 2) {
+    MultiIndexer<RerankADC2> indexer(multiplicity);
+    indexer.BuildMultiIndex(points_file, metainfo_file, points_count, coarse_vocabs, 
+                            fine_vocabs, mode, build_coarse_quantizations,
+                            files_prefix, coarse_quantizations_file);
+  }
+  else if (fine_vocabs.size() == 4) {
+    MultiIndexer<RerankADC4> indexer(multiplicity);
+    indexer.BuildMultiIndex(points_file, metainfo_file, points_count, coarse_vocabs, 
+                            fine_vocabs, mode, build_coarse_quantizations,
+                            files_prefix, coarse_quantizations_file);
+  }
+  else if (fine_vocabs.size() == 6) {
+    MultiIndexer<RerankADC6> indexer(multiplicity);
+    indexer.BuildMultiIndex(points_file, metainfo_file, points_count, coarse_vocabs, 
+                            fine_vocabs, mode, build_coarse_quantizations,
+                            files_prefix, coarse_quantizations_file);
   }
 
   gettimeofday(&end, NULL);

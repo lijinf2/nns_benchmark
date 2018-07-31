@@ -435,7 +435,38 @@ struct RerankADC16 {
   }
 };
 
-
+/**
+ * \added by JF
+ * struct Type of record in multiindex, contains
+ * id of point and 16 bytes for ADC reranking
+ */
+struct RerankADC2 {
+  PointId pid;
+  FineClusterId quantizations[2];
+  template<class Archive>
+  void serialize(Archive& arc, unsigned int version) {
+    arc & pid;
+    arc & quantizations;
+  }
+};
+struct RerankADC4 {
+  PointId pid;
+  FineClusterId quantizations[4];
+  template<class Archive>
+  void serialize(Archive& arc, unsigned int version) {
+    arc & pid;
+    arc & quantizations;
+  }
+};
+struct RerankADC6 {
+  PointId pid;
+  FineClusterId quantizations[6];
+  template<class Archive>
+  void serialize(Archive& arc, unsigned int version) {
+    arc & pid;
+    arc & quantizations;
+  }
+};
 
 
 

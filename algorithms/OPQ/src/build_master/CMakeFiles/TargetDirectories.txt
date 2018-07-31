@@ -1,0 +1,5 @@
+/data/jinfeng/project/github/nns_benchmark/algorithms/OPQ/src/build_master/CMakeFiles/rebuild_cache.dir
+/data/jinfeng/project/github/nns_benchmark/algorithms/OPQ/src/build_master/CMakeFiles/nearest_search_lib.dir
+/data/jinfeng/project/github/nns_benchmark/algorithms/OPQ/src/build_master/CMakeFiles/indexer_launcher.dir
+/data/jinfeng/project/github/nns_benchmark/algorithms/OPQ/src/build_master/CMakeFiles/searcher_tester.dir
+/data/jinfeng/project/github/nns_benchmark/algorithms/OPQ/src/build_master/CMakeFiles/edit_cache.dir

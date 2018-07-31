@@ -4,6 +4,7 @@
 #include <boost/program_options.hpp>
 #include <sys/time.h>
 #include <mkl.h>
+#include "apps/opq_evaluate.cpp"
 
 #include "searcher.h"
 #include "indexer.h"
@@ -72,6 +73,7 @@ int use_originaldata;
 
 int k;
 
+string lshbox_bench_file;
 int SetOptions(int argc, char** argv) {
   options_description description("Options");
   description.add_options()
@@ -92,7 +94,8 @@ int SetOptions(int argc, char** argv) {
 	("dim,d", value<int>())
 	("use_originaldata,u", value<int>())
     ("subspaces_centroids_count,s", value<int>())
-    ("k_neighbors,K", value<int>());
+    ("k_neighbors,K", value<int>())
+    ("lshbox_bench_file,L", value<string>());
 
   variables_map name_to_value;
   try {
@@ -130,6 +133,7 @@ int SetOptions(int argc, char** argv) {
   data_count =                 name_to_value["data_count"].as<int>();
   use_originaldata =           name_to_value["use_originaldata"].as<int>();
   k =                          name_to_value["k_neighbors"].as<int>();
+  lshbox_bench_file =          name_to_value["lshbox_bench_file"].as<string>();
 
   do_rerank =                  (name_to_value["do_rerank"].as<int>() == 0) ? true : false;
   //cout<< "rerank:"<<do_rerank<<endl;
@@ -156,32 +160,46 @@ void TestSearcher(TSearcher& searcher,
                 subspaces_centroids_count,
                 do_rerank,use_originaldata); //,use_originaldata
 
-	std::ofstream out(report_file.c_str(),ios::app);
+    Bencher lshboxBench(lshbox_bench_file.c_str());
+    int max_count = neighbours_count;
+    for (neighbours_count = 1; true; neighbours_count *= 2) {
+    // for (neighbours_count = 15000; true; neighbours_count += 1000) {
+        if (neighbours_count >= max_count)
+            neighbours_count = max_count;
 
-    vector< vector< DistanceToPoint> > result;
-    result.resize(queries_count);
-    timeval start;
-	timeval end;
-    float time=0;
+        std::ofstream out(report_file.c_str(),ios::app);
 
-  	gettimeofday(&start, NULL);
-    for(int i = 0; i < queries_count; ++i) //queries_count
-    {
-    	searcher.GetNearestNeighbours(queries[i],neighbours_count, &result[i],dataset);
+        vector< vector< DistanceToPoint> > result;
+        result.resize(queries_count);
+        timeval start;
+        timeval end;
+        float time=0;
+
+        gettimeofday(&start, NULL);
+        for(int i = 0; i < queries_count; ++i) //queries_count
+        {
+            searcher.GetNearestNeighbours(queries[i],neighbours_count, &result[i],dataset);
+        }
+        gettimeofday(&end, NULL);
+        time += diff_timeval(end, start);
+        float recall = 0.0;
+        for(int i = 0; i < queries_count; ++i) //queries_count
+        {
+          recall += GetRecall(k,groundtruth[i],result[i]);
+        }
+
+        recall = recall/queries_count;
+        //time= time/queries_count ;
+        
+        out.setf(ios::fixed);  
+        // out << recall<<" "<< time<<" #N_"<<neighbours_count<<" "<<endl;  
+        // out << neighbours_count << ", " << time << ", " << recall << ", " << cal_opq_avg_error(lshboxBench, result) << endl;  
+
+        out << neighbours_count << ", " << time << ", " << cal_opq_avg_recall(lshboxBench, result) << ", " << cal_opq_avg_error(lshboxBench, result) << endl;  
+
+        if (neighbours_count >= max_count)
+            break;
     }
-  	gettimeofday(&end, NULL);
-  	time += diff_timeval(end, start);
-    float recall = 0.0;
-	for(int i = 0; i < queries_count; ++i) //queries_count
-    {
-      recall += GetRecall(k,groundtruth[i],result[i]);
-	}
-
-	recall = recall/queries_count;
-	time= time/queries_count ;
-	
-    out.setf(ios::fixed);  
-    out << recall<<" "<< time<<" #N_"<<neighbours_count<<" "<<endl;  
 }
 
 int main(int argc, char** argv) {
@@ -212,6 +230,5 @@ int main(int argc, char** argv) {
     MultiSearcher<RerankADC16, PointId> searcher;
     TestSearcher<MultiSearcher<RerankADC16, PointId> > (searcher, queries, groundtruth,dataset);
   }
-
   return 0;
 }

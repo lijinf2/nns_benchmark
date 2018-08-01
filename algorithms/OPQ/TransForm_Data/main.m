@@ -1,7 +1,7 @@
 n=1000;
 data_name='audio';
-K=8;
-M=8;
+K=8;  % vocabSize = 2 ^ K
+M=8;  % butes per vector
 
 data_path='../../../../data';
 index_path=['../index/' data_name];
